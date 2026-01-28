@@ -39,6 +39,7 @@ const keyMap = {
 
 const pressedKeys = new Set();
 const activeNotes = new Set();
+const chordCells = new Map(); // "C#m" -> <td> element
 
 const NOTE_ORDER = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -97,6 +98,15 @@ function updateNoteDisplay() {
     const chord = detectChord(sorted);
     document.getElementById('noteDisplay').textContent = sorted.join('  ');
     document.getElementById('chordDisplay').textContent = chord || '';
+
+    // Highlight matching chord cell in the grid
+    for (const cell of chordCells.values()) {
+        cell.classList.remove('detected');
+    }
+    if (chord) {
+        const cell = chordCells.get(chord);
+        if (cell) cell.classList.add('detected');
+    }
 }
 
 async function noteOn(noteStr) {
@@ -154,6 +164,7 @@ function buildChordGrid() {
             const td = document.createElement('td');
             td.className = 'chord-cell';
             td.textContent = root + chord.symbol;
+            chordCells.set(root + chord.symbol, td);
             td.addEventListener('click', () => {
                 td.classList.add('playing');
                 setTimeout(() => td.classList.remove('playing'), 800);
