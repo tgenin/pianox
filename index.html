@@ -9,6 +9,16 @@
 
 <body>
   <div id="pianoContainer"></div>
+
+  <!-- use importmap for github page -->
+  <script type="importmap">
+    {
+      "imports": {
+        "piano-chart": "https://cdn.skypack.dev/piano-chart",
+        "tone": "https://cdn.skypack.dev/tone"
+      }
+    }
+  </script>
   <script type="module" src="piano.js"></script>
 </body>
 
