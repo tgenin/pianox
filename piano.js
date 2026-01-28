@@ -24,34 +24,34 @@ piano.addKeyMouseUpListener((note) => {
     piano.keyUp(note);
 });
 
-// Keyboard mappings
+// Keyboard mappings using physical key codes (e.code) for reliability
 const keyMap = {
-    'a': 'C4',
-    's': 'D4',
-    'd': 'E4',
-    'f': 'F4',
-    'g': 'G4',
-    'h': 'A4',
-    'j': 'B4',
-    'k': 'C5',
-    'l': 'D5',
-    ';': 'E5',
-    "'": 'F5',
-    'w': 'C#4',
-    'e': 'D#4',
-    't': 'F#4',
-    'y': 'G#4',
-    'u': 'A#4',
-    'o': 'C#5',
-    'p': 'D#5',
+    'KeyA': 'C4',
+    'KeyS': 'D4',
+    'KeyD': 'E4',
+    'KeyF': 'F4',
+    'KeyG': 'G4',
+    'KeyH': 'A4',
+    'KeyJ': 'B4',
+    'KeyK': 'C5',
+    'KeyL': 'D5',
+    'Semicolon': 'E5',
+    'KeyW': 'C#4',
+    'KeyE': 'D#4',
+    'KeyT': 'F#4',
+    'KeyY': 'G#4',
+    'KeyU': 'A#4',
+    'KeyO': 'C#5',
+    'KeyP': 'D#5',
 };
 
 const pressedKeys = new Set();
 
 document.addEventListener('keydown', async (e) => {
-    const note = keyMap[e.key.toLowerCase()];
-    if (note && !pressedKeys.has(e.key)) {
-        pressedKeys.add(e.key);
+    const note = keyMap[e.code];
+    console.log('[keydown]', { code: e.code, key: e.key, note, alreadyPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
+    if (note && !pressedKeys.has(e.code)) {
+        pressedKeys.add(e.code);
         await Tone.start();
         synth.triggerAttack(note);
         piano.keyDown(note);
@@ -59,9 +59,10 @@ document.addEventListener('keydown', async (e) => {
 });
 
 document.addEventListener('keyup', (e) => {
-    const note = keyMap[e.key.toLowerCase()];
+    const note = keyMap[e.code];
+    console.log('[keyup]', { code: e.code, key: e.key, note, wasPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
     if (note) {
-        pressedKeys.delete(e.key);
+        pressedKeys.delete(e.code);
         synth.triggerRelease(note);
         piano.keyUp(note);
     }
