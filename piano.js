@@ -1,5 +1,6 @@
 import { Instrument } from "piano-chart";
 import * as Tone from "tone";
+import { initMIDI } from "./midi.js";
 let chordDefinitions = {};
 let chordOrder = [];
 fetch("./chords.json").then(r => r.text()).then(text => {
@@ -109,7 +110,7 @@ function updateNoteDisplay() {
     }
 }
 
-async function noteOn(noteStr) {
+export async function noteOn(noteStr) {
     await Tone.start();
     synth.triggerAttack(noteStr);
     if (piano) piano.keyDown(noteStr);
@@ -117,7 +118,7 @@ async function noteOn(noteStr) {
     updateNoteDisplay();
 }
 
-function noteOff(noteStr) {
+export function noteOff(noteStr) {
     synth.triggerRelease(noteStr);
     if (piano) piano.keyUp(noteStr);
     activeNotes.delete(noteStr);
@@ -186,6 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         vividKeyPressColor: 'rgb(51, 116, 255)',
     });
     piano.create();
+
+    initMIDI();
 
     piano.addKeyMouseDownListener((note) => {
         noteOn(noteToString(note));
