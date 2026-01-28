@@ -1,0 +1,30 @@
+{
+  "name": "pianox",
+  "version": "1.0.0",
+  "description": "Virtual Piano",
+  "main": "piano.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tgenin/pianox.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tgenin/pianox/issues"
+  },
+  "homepage": "https://github.com/tgenin/pianox#readme",
+  "dependencies": {
+    "piano-chart": "^1.5.0",
+    "tone": "^15.1.22"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
