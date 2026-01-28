@@ -1,9 +1,13 @@
 import { Instrument } from "piano-chart";
 import * as Tone from "tone";
 let chordDefinitions = {};
-fetch("./chords.json").then(r => r.json()).then(data => { chordDefinitions = data; });
+fetch("./chords.json").then(r => r.json()).then(data => {
+    chordDefinitions = data;
+    buildChordGrid();
+});
 
 const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+let piano;
 
 function noteToString(note) {
     return `${note.note}${note.accidental || ""}${note.octave}`;
@@ -92,50 +96,101 @@ function updateNoteDisplay() {
     document.getElementById('chordDisplay').textContent = chord || '';
 }
 
+async function noteOn(noteStr) {
+    await Tone.start();
+    synth.triggerAttack(noteStr);
+    if (piano) piano.keyDown(noteStr);
+    activeNotes.add(noteStr);
+    updateNoteDisplay();
+}
+
+function noteOff(noteStr) {
+    synth.triggerRelease(noteStr);
+    if (piano) piano.keyUp(noteStr);
+    activeNotes.delete(noteStr);
+    updateNoteDisplay();
+}
+
+function playChord(root, intervals) {
+    const notes = intervals.map(i => {
+        const noteIndex = (NOTE_ORDER.indexOf(root) + i) % 12;
+        const octave = 4 + Math.floor((NOTE_ORDER.indexOf(root) + i) / 12);
+        return NOTE_ORDER[noteIndex] + octave;
+    });
+    notes.forEach(n => noteOn(n));
+    setTimeout(() => notes.forEach(n => noteOff(n)), 800);
+}
+
+function buildChordGrid() {
+    const container = document.getElementById('chordGrid');
+    if (!container) return;
+    const table = document.createElement('table');
+
+    // Header row: empty corner + one column per note
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headerRow.appendChild(document.createElement('th')); // corner
+    for (const note of NOTE_ORDER) {
+        const th = document.createElement('th');
+        th.textContent = note;
+        headerRow.appendChild(th);
+    }
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // One row per chord type
+    const tbody = document.createElement('tbody');
+    for (const [key, chord] of Object.entries(chordDefinitions)) {
+        const tr = document.createElement('tr');
+        const label = document.createElement('td');
+        label.textContent = chord.name;
+        tr.appendChild(label);
+
+        for (const root of NOTE_ORDER) {
+            const td = document.createElement('td');
+            td.className = 'chord-cell';
+            td.textContent = root + chord.symbol;
+            td.addEventListener('click', () => {
+                td.classList.add('playing');
+                setTimeout(() => td.classList.remove('playing'), 800);
+                playChord(root, chord.intervals);
+            });
+            tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    container.appendChild(table);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    const piano = new Instrument(document.getElementById('pianoContainer'), {
+    piano = new Instrument(document.getElementById('pianoContainer'), {
         startOctave: 1,
         endOctave: 8,
     });
     piano.create();
 
-    piano.addKeyMouseDownListener(async (note) => {
-        await Tone.start();
-        synth.triggerAttack(noteToString(note));
-        piano.keyDown(note);
-        activeNotes.add(noteToString(note));
-        updateNoteDisplay();
+    piano.addKeyMouseDownListener((note) => {
+        noteOn(noteToString(note));
     });
 
     piano.addKeyMouseUpListener((note) => {
-        synth.triggerRelease(noteToString(note));
-        piano.keyUp(note);
-        activeNotes.delete(noteToString(note));
-        updateNoteDisplay();
+        noteOff(noteToString(note));
     });
 
-    document.addEventListener('keydown', async (e) => {
+    document.addEventListener('keydown', (e) => {
         const note = keyMap[e.code];
-        // console.log('[keydown]', { code: e.code, key: e.key, note, alreadyPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
         if (note && !pressedKeys.has(e.code)) {
             pressedKeys.add(e.code);
-            await Tone.start();
-            synth.triggerAttack(note);
-            piano.keyDown(note);
-            activeNotes.add(note);
-            updateNoteDisplay();
+            noteOn(note);
         }
     });
 
     document.addEventListener('keyup', (e) => {
         const note = keyMap[e.code];
-        // console.log('[keyup]', { code: e.code, key: e.key, note, wasPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
         if (note) {
             pressedKeys.delete(e.code);
-            synth.triggerRelease(note);
-            piano.keyUp(note);
-            activeNotes.delete(note);
-            updateNoteDisplay();
+            noteOff(note);
         }
     });
 });
