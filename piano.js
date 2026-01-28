@@ -182,6 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
     piano = new Instrument(document.getElementById('pianoContainer'), {
         startOctave: 1,
         endOctave: 8,
+        keyPressStyle: 'vivid',
+        vividKeyPressColor: 'rgb(51, 116, 255)',
     });
     piano.create();
 
