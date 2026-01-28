@@ -1,28 +1,11 @@
 import { Instrument } from "piano-chart";
 import * as Tone from "tone";
 
-const piano = new Instrument(document.getElementById('pianoContainer'), {
-    startOctave: 1,
-    endOctave: 8,
-});
-piano.create();
-
 const synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
 function noteToString(note) {
     return `${note.note}${note.accidental || ""}${note.octave}`;
 }
-
-piano.addKeyMouseDownListener(async (note) => {
-    await Tone.start();
-    synth.triggerAttack(noteToString(note));
-    piano.keyDown(note);
-});
-
-piano.addKeyMouseUpListener((note) => {
-    synth.triggerRelease(noteToString(note));
-    piano.keyUp(note);
-});
 
 // Keyboard mappings using physical key codes (e.code) for reliability
 const keyMap = {
@@ -47,23 +30,42 @@ const keyMap = {
 
 const pressedKeys = new Set();
 
-document.addEventListener('keydown', async (e) => {
-    const note = keyMap[e.code];
-    console.log('[keydown]', { code: e.code, key: e.key, note, alreadyPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
-    if (note && !pressedKeys.has(e.code)) {
-        pressedKeys.add(e.code);
-        await Tone.start();
-        synth.triggerAttack(note);
-        piano.keyDown(note);
-    }
-});
+document.addEventListener('DOMContentLoaded', () => {
+    const piano = new Instrument(document.getElementById('pianoContainer'), {
+        startOctave: 1,
+        endOctave: 8,
+    });
+    piano.create();
 
-document.addEventListener('keyup', (e) => {
-    const note = keyMap[e.code];
-    console.log('[keyup]', { code: e.code, key: e.key, note, wasPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
-    if (note) {
-        pressedKeys.delete(e.code);
-        synth.triggerRelease(note);
+    piano.addKeyMouseDownListener(async (note) => {
+        await Tone.start();
+        synth.triggerAttack(noteToString(note));
+        piano.keyDown(note);
+    });
+
+    piano.addKeyMouseUpListener((note) => {
+        synth.triggerRelease(noteToString(note));
         piano.keyUp(note);
-    }
+    });
+
+    document.addEventListener('keydown', async (e) => {
+        const note = keyMap[e.code];
+        console.log('[keydown]', { code: e.code, key: e.key, note, alreadyPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
+        if (note && !pressedKeys.has(e.code)) {
+            pressedKeys.add(e.code);
+            await Tone.start();
+            synth.triggerAttack(note);
+            piano.keyDown(note);
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        const note = keyMap[e.code];
+        console.log('[keyup]', { code: e.code, key: e.key, note, wasPressed: pressedKeys.has(e.code), pressedKeys: [...pressedKeys] });
+        if (note) {
+            pressedKeys.delete(e.code);
+            synth.triggerRelease(note);
+            piano.keyUp(note);
+        }
+    });
 });
