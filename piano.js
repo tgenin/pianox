@@ -1,8 +1,11 @@
 import { Instrument } from "piano-chart";
 import * as Tone from "tone";
 let chordDefinitions = {};
-fetch("./chords.json").then(r => r.json()).then(data => {
-    chordDefinitions = data;
+let chordOrder = [];
+fetch("./chords.json").then(r => r.text()).then(text => {
+    chordDefinitions = JSON.parse(text);
+    // Preserve key order from JSON (Object.keys reorders numeric keys like "6")
+    chordOrder = [...text.matchAll(/"([^"]+)"\s*:/g)].map(m => m[1]).filter(k => k in chordDefinitions);
     buildChordGrid();
 });
 
@@ -138,9 +141,10 @@ function buildChordGrid() {
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
-    // One row per chord type
+    // Use chordOrder to preserve JSON key order (Object.keys hoists numeric keys like "6")
     const tbody = document.createElement('tbody');
-    for (const [key, chord] of Object.entries(chordDefinitions)) {
+    for (const key of chordOrder) {
+        const chord = chordDefinitions[key];
         const tr = document.createElement('tr');
         const label = document.createElement('td');
         label.textContent = chord.name;
