@@ -29,6 +29,23 @@ const keyMap = {
 };
 
 const pressedKeys = new Set();
+const activeNotes = new Set();
+
+const NOTE_ORDER = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function noteSort(a, b) {
+    const octA = parseInt(a.slice(-1));
+    const octB = parseInt(b.slice(-1));
+    if (octA !== octB) return octA - octB;
+    const nameA = a.slice(0, -1);
+    const nameB = b.slice(0, -1);
+    return NOTE_ORDER.indexOf(nameA) - NOTE_ORDER.indexOf(nameB);
+}
+
+function updateNoteDisplay() {
+    document.getElementById('noteDisplay').textContent =
+        [...activeNotes].sort(noteSort).join('  ');
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const piano = new Instrument(document.getElementById('pianoContainer'), {
@@ -41,11 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
         await Tone.start();
         synth.triggerAttack(noteToString(note));
         piano.keyDown(note);
+        activeNotes.add(noteToString(note));
+        updateNoteDisplay();
     });
 
     piano.addKeyMouseUpListener((note) => {
         synth.triggerRelease(noteToString(note));
         piano.keyUp(note);
+        activeNotes.delete(noteToString(note));
+        updateNoteDisplay();
     });
 
     document.addEventListener('keydown', async (e) => {
@@ -56,6 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
             await Tone.start();
             synth.triggerAttack(note);
             piano.keyDown(note);
+            activeNotes.add(note);
+            updateNoteDisplay();
         }
     });
 
@@ -66,6 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pressedKeys.delete(e.code);
             synth.triggerRelease(note);
             piano.keyUp(note);
+            activeNotes.delete(note);
+            updateNoteDisplay();
         }
     });
 });
