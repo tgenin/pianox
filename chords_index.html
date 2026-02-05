@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pianox - Chord Dictionary</title>
+</head>
+
+<body>
+  <h1 style="text-align:left; font-family:monospace; margin:1rem 0 0.5rem;">Virtual Keyboard Chord Dictionary
+  </h1>
+  <p style="text-align:left; font-family:monospace; font-size:1rem; margin:0 1rem 1rem;">
+    Play with your mouse, your computer keyboard (A/Q SDFGHJKL + W/Z E TYU OP) or your midi keyboard
+    <br><a href="index.html" style="color:#4a90d9;">&larr; Back to Home</a>
+  </p>
+  <div id="pianoContainer"></div>
+  <div id="noteDisplay"
+    style="text-align:center; font-family:monospace; font-size:1.5rem; margin-top:1rem; min-height:2rem;"></div>
+  <div id="chordDisplay"
+    style="text-align:center; font-family:monospace; font-size:2rem; font-weight:bold; margin-top:0.5rem; min-height:2.5rem; color:#4a90d9;">
+  </div>
+
+  <div id="chordGrid" style="margin:1.5rem auto; max-width:95vw; overflow-x:auto;"></div>
+
+  <style>
+    #chordGrid table {
+      border-collapse: collapse;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+
+    #chordGrid th,
+    #chordGrid td {
+      border: 1px solid #ccc;
+      padding: 4px 6px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    #chordGrid th {
+      background: #333;
+      color: #fff;
+      position: sticky;
+      top: 0;
+    }
+
+    #chordGrid th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+
+    #chordGrid td:first-child {
+      background: #f0f0f0;
+      font-weight: bold;
+      position: sticky;
+      left: 0;
+    }
+
+    #chordGrid td.chord-cell {
+      cursor: pointer;
+    }
+
+    #chordGrid td.chord-cell:hover {
+      background: #d0e8ff;
+    }
+
+    #chordGrid td.chord-cell.playing {
+      background: #4a90d9;
+      color: #fff;
+    }
+
+    #chordGrid td.chord-cell.detected {
+      background: #f5a623;
+      color: #fff;
+    }
+  </style>
+
+  <!-- use importmap for github page -->
+  <script type="importmap">
+    {
+      "imports": {
+        "piano-chart": "https://cdn.skypack.dev/piano-chart",
+        "tone": "https://cdn.skypack.dev/tone"
+      }
+    }
+  </script>
+  <script type="module" src="piano.js"></script>
+</body>
+
+</html>
