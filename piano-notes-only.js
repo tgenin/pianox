@@ -69,7 +69,11 @@ function getNotesInRange(startNote, endNote) {
 function pickRandomNote() {
     const startNote = document.getElementById('startNote').value;
     const endNote = document.getElementById('endNote').value;
-    const notes = getNotesInRange(startNote, endNote);
+    const excludeSharps = document.getElementById('excludeSharps').checked;
+    let notes = getNotesInRange(startNote, endNote);
+    if (excludeSharps) {
+        notes = notes.filter(n => !n.includes('#'));
+    }
     mysteryNote = notes[Math.floor(Math.random() * notes.length)];
     playMysteryNote();
 }
