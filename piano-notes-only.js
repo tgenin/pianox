@@ -31,6 +31,7 @@ const keyMap = {
 
 const pressedKeys = new Set();
 const activeNotes = new Set();
+let mysteryNote = null;
 
 const NOTE_ORDER = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -41,6 +42,42 @@ function noteSort(a, b) {
     const nameA = a.slice(0, -1);
     const nameB = b.slice(0, -1);
     return NOTE_ORDER.indexOf(nameA) - NOTE_ORDER.indexOf(nameB);
+}
+
+function noteToIndex(noteStr) {
+    const octave = parseInt(noteStr.slice(-1));
+    const name = noteStr.slice(0, -1);
+    return octave * 12 + NOTE_ORDER.indexOf(name);
+}
+
+function indexToNote(index) {
+    const octave = Math.floor(index / 12);
+    const name = NOTE_ORDER[index % 12];
+    return name + octave;
+}
+
+function getNotesInRange(startNote, endNote) {
+    const startIdx = noteToIndex(startNote);
+    const endIdx = noteToIndex(endNote);
+    const notes = [];
+    for (let i = startIdx; i <= endIdx; i++) {
+        notes.push(indexToNote(i));
+    }
+    return notes;
+}
+
+function pickRandomNote() {
+    const startNote = document.getElementById('startNote').value;
+    const endNote = document.getElementById('endNote').value;
+    const notes = getNotesInRange(startNote, endNote);
+    mysteryNote = notes[Math.floor(Math.random() * notes.length)];
+    playMysteryNote();
+}
+
+async function playMysteryNote() {
+    if (!mysteryNote) return;
+    await Tone.start();
+    synth.triggerAttackRelease(mysteryNote, '0.5');
 }
 
 function updateNoteDisplay() {
@@ -111,6 +148,20 @@ document.addEventListener('DOMContentLoaded', () => {
     piano.create();
 
     initMIDI();
+
+    // Populate note range dropdowns
+    const startSelect = document.getElementById('startNote');
+    const endSelect = document.getElementById('endNote');
+    const allNotes = getNotesInRange('C1', 'B8');
+    allNotes.forEach(note => {
+        startSelect.add(new Option(note, note));
+        endSelect.add(new Option(note, note));
+    });
+    startSelect.value = 'C4';
+    endSelect.value = 'B4';
+
+    document.getElementById('newNoteBtn').addEventListener('click', pickRandomNote);
+    document.getElementById('replayBtn').addEventListener('click', playMysteryNote);
 
     piano.addKeyMouseDownListener((note) => {
         noteOn(noteToString(note));

@@ -14,6 +14,15 @@
     Play with your mouse, your computer keyboard (A/Q SDFGHJKL + W/Z E TYU OP) or your midi keyboard
     <br><a href="index.html" style="color:#4a90d9;">&larr; Back to Home</a>
   </p>
+  <div style="text-align:center; font-family:monospace; margin:1rem 0;">
+    <label>Range:
+      <select id="startNote"></select>
+      <span> to </span>
+      <select id="endNote"></select>
+    </label>
+    <button id="newNoteBtn" style="margin-left:1rem; padding:0.5rem 1rem;">New Note</button>
+    <button id="replayBtn" style="margin-left:0.5rem; padding:0.5rem 1rem;">Replay</button>
+  </div>
   <div id="pianoContainer"></div>
   <div id="noteDisplay"
     style="text-align:center; font-family:monospace; font-size:1.5rem; margin-top:1rem; min-height:2rem;"></div>
