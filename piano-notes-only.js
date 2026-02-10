@@ -33,6 +33,7 @@ const pressedKeys = new Set();
 const activeNotes = new Set();
 let mysteryNote = null;
 let guessCount = 0;
+const history = [];
 
 const NOTE_ORDER = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -99,6 +100,13 @@ function updateRangeHighlight() {
     });
 }
 
+function renderHistory() {
+    const el = document.getElementById('historyDisplay');
+    el.innerHTML = history.map(h =>
+        `<span style="padding:0.2rem 0.5rem; border-radius:4px; background:${h.found ? '#e6ffe6' : '#ffe6e6'};">${h.found ? '\u2705' : '\u274c'} ${h.note} (${h.tries})</span>`
+    ).join('');
+}
+
 function updateTriesDisplay() {
     const el = document.getElementById('triesDisplay');
     if (mysteryNote) {
@@ -109,6 +117,10 @@ function updateTriesDisplay() {
 }
 
 function pickRandomNote() {
+    if (mysteryNote) {
+        history.push({ note: mysteryNote, tries: guessCount, found: false });
+        renderHistory();
+    }
     document.getElementById('resultDisplay').textContent = '';
     guessCount = 0;
     const startNote = document.getElementById('startNote').value;
@@ -148,6 +160,9 @@ async function noteOn(noteStr) {
                 ? 'You win on the first try!'
                 : `You win in ${guessCount} attempts!`;
             document.getElementById('resultDisplay').textContent = msg;
+            history.push({ note: mysteryNote, tries: guessCount, found: true });
+            mysteryNote = null;
+            renderHistory();
         }
     }
 }
