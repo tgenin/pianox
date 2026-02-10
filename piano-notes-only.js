@@ -32,6 +32,7 @@ const keyMap = {
 const pressedKeys = new Set();
 const activeNotes = new Set();
 let mysteryNote = null;
+let guessCount = 0;
 
 const NOTE_ORDER = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -98,7 +99,18 @@ function updateRangeHighlight() {
     });
 }
 
+function updateTriesDisplay() {
+    const el = document.getElementById('triesDisplay');
+    if (mysteryNote) {
+        el.textContent = `Attempts: ${guessCount}`;
+    } else {
+        el.textContent = '';
+    }
+}
+
 function pickRandomNote() {
+    document.getElementById('resultDisplay').textContent = '';
+    guessCount = 0;
     const startNote = document.getElementById('startNote').value;
     const endNote = document.getElementById('endNote').value;
     const excludeSharps = document.getElementById('excludeSharps').checked;
@@ -107,6 +119,7 @@ function pickRandomNote() {
         notes = notes.filter(n => !n.includes('#'));
     }
     mysteryNote = notes[Math.floor(Math.random() * notes.length)];
+    updateTriesDisplay();
     playMysteryNote();
 }
 
@@ -127,6 +140,16 @@ async function noteOn(noteStr) {
     if (piano) piano.keyDown(noteStr);
     activeNotes.add(noteStr);
     updateNoteDisplay();
+    if (mysteryNote) {
+        guessCount++;
+        updateTriesDisplay();
+        if (noteStr === mysteryNote) {
+            const msg = guessCount === 1
+                ? 'You win on the first try!'
+                : `You win in ${guessCount} attempts!`;
+            document.getElementById('resultDisplay').textContent = msg;
+        }
+    }
 }
 
 function noteOff(noteStr) {
