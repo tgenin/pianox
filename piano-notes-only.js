@@ -56,6 +56,15 @@ function indexToNote(index) {
     return name + octave;
 }
 
+function noteStrToHighlightObj(noteStr) {
+    const octave = parseInt(noteStr.slice(-1));
+    const name = noteStr.slice(0, -1);
+    if (name.length > 1) {
+        return { note: name[0], accidental: name.slice(1), octave };
+    }
+    return { note: name, octave };
+}
+
 function getNotesInRange(startNote, endNote) {
     const startIdx = noteToIndex(startNote);
     const endIdx = noteToIndex(endNote);
@@ -64,6 +73,29 @@ function getNotesInRange(startNote, endNote) {
         notes.push(indexToNote(i));
     }
     return notes;
+}
+
+function updateRangeHighlight() {
+    if (!piano) return;
+    console.log("updateRangeHighlight")
+    const startNote = document.getElementById('startNote').value;
+    const endNote = document.getElementById('endNote').value;
+    const excludeSharps = document.getElementById('excludeSharps').checked;
+    const startIdx = noteToIndex(startNote);
+    const endIdx = noteToIndex(endNote);
+    const allNotes = getNotesInRange('C1', 'B8');
+    const outsideNotes = allNotes
+        .filter(n => {
+            const idx = noteToIndex(n);
+            if (idx < startIdx || idx > endIdx) return true;
+            if (excludeSharps && n.includes('#')) return true;
+            return false;
+        })
+        .map(noteStrToHighlightObj);
+    piano.applySettings({
+        highlightedNotes: outsideNotes,
+        highlightColor: '#888888',
+    });
 }
 
 function pickRandomNote() {
@@ -148,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         endOctave: 8,
         keyPressStyle: 'vivid',
         vividKeyPressColor: 'rgb(51, 116, 255)',
+        showOctaveNumbers: true,
     });
     piano.create();
 
@@ -163,6 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     startSelect.value = 'C4';
     endSelect.value = 'B4';
+
+    startSelect.addEventListener('change', updateRangeHighlight);
+    endSelect.addEventListener('change', updateRangeHighlight);
+    document.getElementById('excludeSharps').addEventListener('change', updateRangeHighlight);
+    updateRangeHighlight();
 
     document.getElementById('newNoteBtn').addEventListener('click', pickRandomNote);
     document.getElementById('replayBtn').addEventListener('click', playMysteryNote);
